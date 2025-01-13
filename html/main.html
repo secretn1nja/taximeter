@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taximeter</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="taximeter">
+        <div class="display">
+            <span id="fare">Fare: $0.00</span>
+            <span id="distance">Distance: 0.0 m</span>
+        </div>
+        <div class="buttons">
+            <button class="button" id="start">Start</button>
+            <button class="button" id="pause">Pause</button>
+            <button class="button" id="reset">Reset Clock</button>
+            <button class="button" id="close">Close</button>
+        </div>
+    </div>
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <h2>Ride History</h2>
+            <ul id="historyList"></ul>
+        </div>
+    </div>
+    <script src="./script.js"></script>
+</body>
+</html>
