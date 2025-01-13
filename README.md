@@ -15,5 +15,5 @@ Configure rates in config.lua.
 
 # Keybinds:
 
-**X**– Turn on/off the taximeter.
+**X** – Turn on/off the taximeter.
 Other keybinds can be seen in configuration file.
