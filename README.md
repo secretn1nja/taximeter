@@ -1,6 +1,8 @@
-(https://streamable.com/h4jtw6)
+https://streamable.com/h4jtw6
 # taximeter
-A fully functional taximeter system for FiveM with ride history tracking. Players can configure a taxi vehicle that have the taximeter, and view their ride history. Ideal for roleplay servers offering taxi services.
+A fully functional taximeter
+
+ system for FiveM with ride history tracking. Players can configure a taxi vehicle that have the taximeter, and view their ride history. Ideal for roleplay servers offering taxi services.
 
 # Features:
 
