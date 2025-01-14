@@ -1,5 +1,4 @@
-https://streamable.com/h4jtw6
-# taximeter
+# Taximeter
 A fully functional taximeter
 
  system for FiveM with ride history tracking. Players can configure a taxi vehicle that have the taximeter, and view their ride history. Ideal for roleplay servers offering taxi services.
@@ -20,3 +19,6 @@ Configure rates in config.lua.
 
 **X** – Turn on/off the taximeter.
 Other keybinds can be seen in configuration file.
+
+# Preview
+https://streamable.com/h4jtw6
