@@ -116,3 +116,43 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 });
+
+let isStartActive = false;
+let isResetActive = false;  
+
+window.addEventListener('message', function (event) {
+    const data = event.data;
+
+    if (data.action === 'setActive') {
+        const button = document.getElementById(data.button);
+        if (button) {
+            button.classList.add('active');
+            if (data.button === 'start') {
+                isStartActive = true;
+            } else if (data.button === 'reset') {
+                isResetActive = true;
+            }
+        }
+    }
+
+    if (data.action === 'removeActive') {
+        const button = document.getElementById(data.button);
+        if (button) {
+            button.classList.remove('active');
+            if (data.button === 'start') {
+                isStartActive = false;
+            } else if (data.button === 'reset') {
+                isResetActive = false;
+            }
+        }
+    }
+});
+
+function resetButtons() {
+    if (isStartActive) {
+        SendNUIMessage({ action: 'removeActive', button: 'start' });
+    }
+    if (isResetActive) {
+        SendNUIMessage({ action: 'setActive', button: 'reset' });
+    }
+}

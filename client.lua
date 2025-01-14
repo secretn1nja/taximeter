@@ -128,18 +128,34 @@ Citizen.CreateThread(function()
 
         if isPlayerInTaxi() and IsControlJustPressed(0, Config.Keys.Start) then
             startMeter()
+            SendNUIMessage({ action = 'setActive', button = 'start' })
+            SendNUIMessage({ action = 'removeActive', button = 'reset' })
+
+            SendNUIMessage({ action = 'removeActive', button = 'pause' })
         end
 
         if isPlayerInTaxi() and IsControlJustPressed(0, Config.Keys.Pause) then
             stopMeter()
+            SendNUIMessage({ action = 'setActive', button = 'pause' })
+            SendNUIMessage({ action = 'removeActive', button = 'start' })
         end
 
         if isPlayerInTaxi() and IsControlJustPressed(0, Config.Keys.Reset) then
             if fare > 0 and distance > 0 then
                 addRideToHistory(fare, distance)
             end
+
+            if Config.PauseOnReset == true then
+                stopMeter()
+                SendNUIMessage({ action = 'setActive', button = 'pause' })
+            elseif Config.PauseOnReset == false then
+                SendNUIMessage({ action = 'removeActive', button = 'pause' })
+                startMeter()
+            end
             resetMeter()
             isRideRecorded = false
+            SendNUIMessage({ action = 'removeActive', button = 'start' })
+            SendNUIMessage({ action = 'setActive', button = 'reset' })
         end
 
         if IsControlJustPressed(0, Config.Keys.ToggleDisplay) then
