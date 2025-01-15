@@ -44,15 +44,33 @@ function isPlayerInTaxi()
 end
 
 function toggleDisplay()
-    if isPlayerInTaxi() then
-        display = not display
-        SetNuiFocus(false, false)
-        SendNUIMessage({
-            type = "ui",
-            status = display
-        })
+    if isPlayerInTaxi() and isPlayerTaxiDriver() then
+        local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+        if vehicle ~= 0 then
+            local vehicleNetId = NetworkGetNetworkIdFromEntity(vehicle)
+            TriggerServerEvent('taximeter:toggleDisplayForVehicle', vehicleNetId)
+        end
+    else
+        TriggerEvent('chat:addMessage', { args = { "You must be the taxi driver to control the meter display." } })
     end
 end
+
+function updateRoleForPlayer()
+    local isDriver = isPlayerTaxiDriver()
+    SendNUIMessage({
+        type = "role",
+        isDriver = isDriver
+    })
+end
+
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(1000)
+        if isPlayerInTaxi() then
+            updateRoleForPlayer()
+        end
+    end
+end)
 
 function toggleHistoryDisplay()
     historyDisplay = not historyDisplay
@@ -126,7 +144,7 @@ Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
 
-        if isPlayerInTaxi() and IsControlJustPressed(0, Config.Keys.Start) then
+        if isPlayerInTaxi() and isPlayerTaxiDriver() and IsControlJustPressed(0, Config.Keys.Start) then
             startMeter()
             SendNUIMessage({ action = 'setActive', button = 'start' })
             SendNUIMessage({ action = 'removeActive', button = 'reset' })
@@ -134,13 +152,13 @@ Citizen.CreateThread(function()
             SendNUIMessage({ action = 'removeActive', button = 'pause' })
         end
 
-        if isPlayerInTaxi() and IsControlJustPressed(0, Config.Keys.Pause) then
+        if isPlayerInTaxi() and isPlayerTaxiDriver() and IsControlJustPressed(0, Config.Keys.Pause) then
             stopMeter()
             SendNUIMessage({ action = 'setActive', button = 'pause' })
             SendNUIMessage({ action = 'removeActive', button = 'start' })
         end
 
-        if isPlayerInTaxi() and IsControlJustPressed(0, Config.Keys.Reset) then
+        if isPlayerInTaxi() and isPlayerTaxiDriver() and IsControlJustPressed(0, Config.Keys.Reset) then
             if fare > 0 and distance > 0 then
                 addRideToHistory(fare, distance)
             end
@@ -162,7 +180,7 @@ Citizen.CreateThread(function()
             toggleDisplay()
         end
 
-        if IsControlJustPressed(0, Config.Keys.History) then
+        if isPlayerTaxiDriver() and IsControlJustPressed(0, Config.Keys.History) then
             toggleHistoryDisplay()
         end
     end
@@ -178,6 +196,92 @@ Citizen.CreateThread(function()
                 type = "ui",
                 status = display
             })
+        end
+    end
+end)
+
+RegisterNetEvent('taximeter:toggleDisplay')
+AddEventHandler('taximeter:toggleDisplay', function(toggle, isDriver)
+    display = toggle
+    SetNuiFocus(false, false)
+    SendNUIMessage({
+        type = "ui",
+        status = display
+    })
+    SendNUIMessage({
+        type = "role",
+        isDriver = isDriver
+    })
+end)
+
+RegisterNetEvent('taximeter:requestPassengers')
+AddEventHandler('taximeter:requestPassengers', function(vehicleNetId, displayState)
+    local vehicle = NetworkGetEntityFromNetworkId(vehicleNetId)
+    local passengers = {}
+
+    if vehicle ~= 0 then
+        for seat = -1, GetVehicleMaxNumberOfPassengers(vehicle) - 1 do
+            local ped = GetPedInVehicleSeat(vehicle, seat)
+            if ped ~= 0 then
+                local playerId = NetworkGetPlayerIndexFromPed(ped)
+                if playerId ~= -1 then
+                    local serverId = GetPlayerServerId(playerId)
+                    table.insert(passengers, serverId)
+                end
+            end
+        end
+
+        TriggerServerEvent('taximeter:reportPassengers', vehicleNetId, passengers, displayState)
+    end
+end)
+
+RegisterNetEvent('taximeter:updateData')
+AddEventHandler('taximeter:updateData', function(newFare, newDistance)
+    fare = newFare
+    distance = newDistance
+
+    if display then
+        SendNUIMessage({
+            type = "update",
+            fare = fare,
+            distance = distance
+        })
+    end
+end)
+
+function isPlayerTaxiDriver()
+    local ped = PlayerPedId()
+    local vehicle = GetVehiclePedIsIn(ped, false)
+    local seat = -1
+
+    if vehicle ~= 0 and GetPedInVehicleSeat(vehicle, seat) == ped and GetEntityModel(vehicle) == GetHashKey(Config.TaxiModel) then
+        return true
+    else
+        return false
+    end
+end
+
+function updateMeterData()
+    local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+    if vehicle ~= 0 and isPlayerTaxiDriver() then
+        local vehicleNetId = NetworkGetNetworkIdFromEntity(vehicle)
+        local passengerCount = 0
+
+        for seat = 0, GetVehicleMaxNumberOfPassengers(vehicle) - 1 do
+            if not IsVehicleSeatFree(vehicle, seat) then
+                passengerCount = passengerCount + 1
+            end
+        end
+
+        TriggerServerEvent('taximeter:updateMeterData', vehicleNetId, fare, distance, passengerCount)
+    end
+end
+
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(1000)
+        if isPlayerTaxiDriver() and display then
+            updateMeterData()
         end
     end
 end)

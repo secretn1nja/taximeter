@@ -110,6 +110,14 @@ body {
   border-color: #c0392b;
 }
 
+.driver-only {
+    display: flex;
+}
+
+.driver-only.hidden {
+    display: none;
+}
+
 .modal {
   display: none;
   position: fixed;
@@ -154,7 +162,7 @@ body {
   max-height: auto;
   overflow-y: auto;
   overflow-x: hidden;
-  border-top: 2px solid #ff6600;
+  border-top: 2px solid #f39c12;
 }
 
 #historyList li {
@@ -165,7 +173,7 @@ body {
   border-radius: 8px;
   font-size: 16px;
   color: #fff;
-  border-left: 4px solid #ff6600; 
+  border-left: 4px solid #f39c12; 
   transition: all 0.3s ease;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
 }
@@ -180,7 +188,7 @@ body {
 .history-fare {
   font-size: 18px;
   font-weight: bold;
-  color: #ff6600; 
+  color: #f39c12; 
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); 
 }
 

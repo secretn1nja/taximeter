@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     let running = false;
     let fare = 0.0;
     let distance = 0.0;
@@ -6,41 +6,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const fareDisplay = document.getElementById('fare');
     const distanceDisplay = document.getElementById('distance');
-
     const historyModal = document.getElementById('historyModal');
     const historyList = document.getElementById('historyList');
 
     let rideHistory = [];
 
-    document.getElementById('start').addEventListener('click', () => {
-        if (!running) {
-            running = true;
-            startTaxiMeter();
-        }
-    });
+    const buttons = {
+        start: document.getElementById('start'),
+        pause: document.getElementById('pause'),
+        reset: document.getElementById('reset'),
+        close: document.getElementById('close'),
+    };
 
-    document.getElementById('pause').addEventListener('click', () => {
-        running = false;
-    });
+    function startMeter() {
+        if (running) return;
+        running = true;
 
-    document.getElementById('reset').addEventListener('click', () => {
-        running = false;
-        fare = 0.0;
-        distance = 0.0;
-        updateDisplay();
-    });
-
-    document.getElementById('close').addEventListener('click', () => {
-        fetch(`https://${GetParentResourceName()}/close`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: JSON.stringify({})
-        });
-    });
-
-    function startTaxiMeter() {
         const interval = setInterval(() => {
             if (!running) {
                 clearInterval(interval);
@@ -52,107 +33,98 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 1000);
     }
 
+    function pauseMeter() {
+        running = false;
+    }
+
+    function resetMeter() {
+        pauseMeter();
+        addRideToHistory();
+        fare = 0.0;
+        distance = 0.0;
+        updateDisplay();
+    }
+
+    function closeApp() {
+        fetch(`https://${GetParentResourceName()}/close`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({}),
+        });
+    }
+
     function updateDisplay() {
         fareDisplay.innerText = `Fare: $${fare.toFixed(2)}`;
         distanceDisplay.innerText = `Distance: ${distance.toFixed(1)} m`;
     }
 
     function addRideToHistory() {
-        if (rideHistory.length >= 10) {
-            rideHistory.shift();
+        if (fare > 0 && distance > 0) {
+            if (rideHistory.length >= 10) rideHistory.shift();
+            rideHistory.push({ fare, distance });
+            updateHistoryDisplay();
         }
-        rideHistory.push({
-            fare: fare,
-            distance: distance,
-        });
     }
 
     function updateHistoryDisplay() {
         historyList.innerHTML = '';
-        rideHistory.forEach(ride => {
+        rideHistory.forEach(({ fare, distance }) => {
             const listItem = document.createElement('li');
-            listItem.innerText = `Fare: $${ride.fare.toFixed(2)}, Distance: ${ride.distance.toFixed(1)} m`;
+            listItem.innerText = `Fare: $${fare.toFixed(2)}, Distance: ${distance.toFixed(1)} m`;
             historyList.appendChild(listItem);
         });
     }
 
-
-    window.addEventListener('message', (event) => {
-        const data = event.data;
-
-        if (data.type === 'ui') {
-            if (data.status) {
-                document.body.style.display = "flex";
-            } else {
-                document.body.style.display = "none";
-            }
-        }
-
-        if (data.type === 'update') {
-            fareDisplay.innerText = `Fare: $${data.fare.toFixed(2)}`;
-            distanceDisplay.innerText = `Distance: ${data.distance.toFixed(1)} m`;
-        }
-
-        if (data.type === 'updateHistory') {
-            rideHistory = data.history;
-            updateHistoryDisplay();
-        }
-
-        if (data.type === 'historyUI') {
-            if (data.status) {
-                historyModal.style.display = "flex";
-            } else {
-                historyModal.style.display = "none";
-            }
+    window.addEventListener('message', ({ data }) => {
+        switch (data.type) {
+            case 'ui':
+                document.body.style.display = data.status ? 'flex' : 'none';
+                break;
+            case 'update':
+                fareDisplay.innerText = `Fare: $${data.fare.toFixed(2)}`;
+                distanceDisplay.innerText = `Distance: ${data.distance.toFixed(1)} m`;
+                break;
+            case 'role':
+                toggleDriverButtons(data.isDriver);
+                break;
+            case 'updateHistory':
+                rideHistory = data.history;
+                updateHistoryDisplay();
+                break;
+            case 'historyUI':
+                historyModal.style.display = data.status ? 'flex' : 'none';
+                break;
         }
     });
 
-    function toggleHistoryDisplay() {
-        fetch(`https://${GetParentResourceName()}/toggleHistory`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
-        });
+    function toggleDriverButtons(isDriver) {
+        const driverButtons = document.querySelector('.buttons.driver-only');
+        driverButtons.classList.toggle('hidden', !isDriver);
     }
 
-});
+    let isStartActive = false;
+    let isResetActive = false;
 
-let isStartActive = false;
-let isResetActive = false;  
+    window.addEventListener('message', ({ data }) => {
+        if (data.action === 'setActive' || data.action === 'removeActive') {
+            const button = document.getElementById(data.button);
+            if (!button) return;
 
-window.addEventListener('message', function (event) {
-    const data = event.data;
+            const active = data.action === 'setActive';
+            button.classList.toggle('active', active);
 
-    if (data.action === 'setActive') {
-        const button = document.getElementById(data.button);
-        if (button) {
-            button.classList.add('active');
-            if (data.button === 'start') {
-                isStartActive = true;
-            } else if (data.button === 'reset') {
-                isResetActive = true;
-            }
+            if (data.button === 'start') isStartActive = active;
+            if (data.button === 'reset') isResetActive = active;
         }
+    });
+
+    function resetButtons() {
+        if (isStartActive) toggleButtonState('start', false);
+        if (isResetActive) toggleButtonState('reset', true);
     }
 
-    if (data.action === 'removeActive') {
-        const button = document.getElementById(data.button);
-        if (button) {
-            button.classList.remove('active');
-            if (data.button === 'start') {
-                isStartActive = false;
-            } else if (data.button === 'reset') {
-                isResetActive = false;
-            }
-        }
+    function toggleButtonState(buttonId, active) {
+        const action = active ? 'setActive' : 'removeActive';
+        SendNUIMessage({ action, button: buttonId });
     }
 });
-
-function resetButtons() {
-    if (isStartActive) {
-        SendNUIMessage({ action: 'removeActive', button: 'start' });
-    }
-    if (isResetActive) {
-        SendNUIMessage({ action: 'setActive', button: 'reset' });
-    }
-}

@@ -6,11 +6,12 @@ A fully functional taximeter system for FiveM with ride history tracking. Player
 Ride history log with details (fare, distance).
 Configurable settings and keybinds.
 Simple UI for fare and history display.
+Dynamic Ui for driver and passengers.
 
 # Installation:
 
 Download and place in resources/ directory.
-Add start taximeter_with_history to server.cfg.
+Add start taximeter to server.cfg.
 Configure rates in config.lua.
 
 # Keybinds:
