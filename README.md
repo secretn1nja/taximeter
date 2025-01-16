@@ -20,4 +20,4 @@ Configure rates in config.lua.
 Other keybinds can be seen in configuration file.
 
 # Preview
-https://streamable.com/h4jtw6
+https://streamable.com/ah01en
