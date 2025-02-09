@@ -36,11 +36,12 @@ function isPlayerInTaxi()
     local ped = PlayerPedId()
     local vehicle = GetVehiclePedIsIn(ped, false)
 
-    if vehicle ~= 0 and GetEntityModel(vehicle) == GetHashKey(Config.TaxiModel) then
-        return true
-    else
-        return false
+    for _, model in ipairs(Config.TaxiModel) do
+        if vehicle ~= 0 and GetEntityModel(vehicle) == GetHashKey(model) then
+            return true
+        end
     end
+    return false
 end
 
 function toggleDisplay()
@@ -254,11 +255,14 @@ function isPlayerTaxiDriver()
     local vehicle = GetVehiclePedIsIn(ped, false)
     local seat = -1
 
-    if vehicle ~= 0 and GetPedInVehicleSeat(vehicle, seat) == ped and GetEntityModel(vehicle) == GetHashKey(Config.TaxiModel) then
-        return true
-    else
-        return false
+    if GetPedInVehicleSeat(vehicle, seat) == ped then
+        for _, model in ipairs(Config.TaxiModel) do
+            if GetEntityModel(vehicle) == GetHashKey(model) then
+                return true
+            end
+        end
     end
+    return false
 end
 
 function updateMeterData()

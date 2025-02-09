@@ -1,6 +1,6 @@
 Config = {}
 
-Config.TaxiModel = 'taxi'
+Config.TaxiModel = { 'taxi', 'kuruma', 'adder' }
 Config.FareRate = 0.5 -- 1.0 is equal with the distance
 Config.MaxRidesHistory = 10
 Config.PauseOnReset = true
