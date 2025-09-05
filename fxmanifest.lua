@@ -3,8 +3,8 @@ game 'gta5'
 lua54 'yes'
 
 author 'n1nja'
-description 'A simple taximeter made as my first resource.'
-version '1.0.3'
+description 'A modern, optimized taximeter system with enhanced UI and performance improvements.'
+version '2.0.0'
 
 ui_page 'html/main.html'
 
@@ -15,14 +15,20 @@ files {
 }
 
 client_scripts {
-    'client.lua',
     'config.lua',
+    'client.lua',
 }
 
 server_script 'server.lua'
 
 shared_scripts {
     'config.lua',
+}
+
+-- Dependencies (optional)
+dependencies {
+    'yarn',
+    'webpack'
 }
 
 escrow_ignore {

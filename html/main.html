@@ -3,28 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taximeter</title>
+    <title>Taximeter Pro</title>
     <link rel="stylesheet" href="./styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="taximeter">
+    <div class="taximeter" id="taximeter">
+        <div class="header">
+            <div class="logo">
+                <span class="taxi-icon">🚕</span>
+                <span class="title">TAXI METER</span>
+            </div>
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot"></span>
+                <span class="status-text">READY</span>
+            </div>
+        </div>
+        
         <div class="display">
-            <span id="fare">Fare: $0.00</span>
-            <span id="distance">Distance: 0.0 m</span>
+            <div class="fare-section">
+                <span class="label">FARE</span>
+                <span id="fare" class="value">$0.00</span>
+            </div>
+            <div class="distance-section">
+                <span class="label">DISTANCE</span>
+                <span id="distance" class="value">0.0 m</span>
+            </div>
         </div>
-        <div class="buttons driver-only">
-            <button class="button" id="start">Start</button>
-            <button class="button" id="pause">Pause</button>
-            <button class="button" id="reset">Reset Clock</button>
-            <button class="button" id="close">Close</button>
+        
+        <div class="buttons driver-only" id="controlButtons">
+            <button class="button primary" id="start" title="Start Meter">
+                <span class="icon">▶</span>
+                <span class="text">START</span>
+            </button>
+            <button class="button secondary" id="pause" title="Pause Meter">
+                <span class="icon">⏸</span>
+                <span class="text">PAUSE</span>
+            </button>
+            <button class="button warning" id="reset" title="Reset & Save">
+                <span class="icon">🔄</span>
+                <span class="text">RESET</span>
+            </button>
+            <button class="button danger" id="close" title="Close">
+                <span class="icon">✕</span>
+                <span class="text">CLOSE</span>
+            </button>
         </div>
     </div>
+    
     <div id="historyModal" class="modal">
+        <div class="modal-backdrop" id="modalBackdrop"></div>
         <div class="modal-content">
-            <h2>Ride History</h2>
-            <ul id="historyList"></ul>
+            <div class="modal-header">
+                <h2>📋 Ride History</h2>
+                <button class="modal-close" id="modalClose">✕</button>
+            </div>
+            <div class="modal-body">
+                <ul id="historyList" class="history-list"></ul>
+                <div class="empty-state" id="emptyState">
+                    <span class="empty-icon">📊</span>
+                    <p>No rides recorded yet</p>
+                </div>
+            </div>
         </div>
     </div>
+    
     <script src="./script.js"></script>
 </body>
 </html>
